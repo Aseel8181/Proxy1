@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Secure Proxy Flow Dashboard</title>
+<style>
+  :root{
+    --bg:#f3f6f4;
+    --surface:#ffffff;
+    --surface-2:#f8fbf9;
+    --border:#d7e3dc;
+    --text:#102018;
+    --muted:#5c7166;
+
+    --primary:#00723e;
+    --primary-2:#0b8f52;
+    --primary-3:#19a764;
+    --primary-soft:#e7f7ef;
+
+    --dark:#0e1a14;
+    --dark-2:#16241d;
+
+    --success:#16a34a;
+    --success-soft:#dcfce7;
+
+    --danger:#dc2626;
+    --danger-soft:#fee2e2;
+
+    --warning:#b45309;
+    --warning-soft:#ffedd5;
+
+    --shadow:0 12px 32px rgba(16,32,24,.08);
+    --shadow-soft:0 6px 18px rgba(16,32,24,.06);
+
+    --radius-xl:24px;
+    --radius-lg:18px;
+    --radius-md:14px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+
+  body{
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(0,114,62,.09), transparent 26%),
+      radial-gradient(circle at 100% 0%, rgba(11,143,82,.08), transparent 24%),
+      linear-gradient(180deg,#f7faf8 0%, #f2f6f3 100%);
+    color:var(--text);
+  }
+
+  .wrap{
+    max-width:1400px;
+    margin:2px auto;
+    padding:0 1px 2px;
+  }
+
+  .hero{
+    background:linear-gradient(
+      90deg,
+      #ffffff 0%,
+      #edf7f2 18%,
+      #d7efe4 38%,
+      #97cfb5 68%,
+      #0b7a46 100%
+    );
+    color:#102018;
+    border-radius:28px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+    margin-bottom:18px;
+  }
+
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-70px;
+    left:-70px;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:rgba(16,32,24,.06);
+  }
+
+  .hero::after{
+    content:"";
+    position:absolute;
+    top:-90px;
+    right:-60px;
+    width:280px;
+    height:280px;
+    border-radius:50%;
+    background:rgba(255,255,255,.10);
+  }
+
+  .heroTop{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+    position:relative;
+    z-index:1;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+
+  .logoBox{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 12px;
+    border-radius:20px;
+    background:rgba(255,255,255,.35);
+    border:1px solid rgba(255,255,255,.55);
+    backdrop-filter:blur(8px);
+    box-shadow:0 12px 28px rgba(0,0,0,.12);
+  }
+
+  .logoBox img{
+    height:95px;
+    width:auto;
+    display:block;
+  }
+
+  .heroText h1{
+    margin:0;
+    font-size:30px;
+    font-weight:900;
+    letter-spacing:-.02em;
+    color:#102018;
+  }
+
+  .heroText p{
+    margin:8px 0 0;
+    color:#2f4f43;
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  .heroBadges{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .heroBadge{
+    padding:10px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,.22);
+    border:1px solid rgba(255,255,255,.38);
+    color:#102018;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    box-shadow:0 4px 12px rgba(16,32,24,.08);
+  }
+
+  .toolbar{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:16px 18px;
+    box-shadow:var(--shadow-soft);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+
+  .statusWrap{
+    min-width:280px;
+  }
+
+  .statusHead{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:900;
+    font-size:15px;
+    margin-bottom:6px;
+  }
+
+  .pulse{
+    width:11px;
+    height:11px;
+    border-radius:50%;
+    background:var(--primary-3);
+    box-shadow:0 0 0 0 rgba(25,167,100,.45);
+    animation:pulse 1.8s infinite;
+  }
+
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(25,167,100,.45)}
+    70%{box-shadow:0 0 0 12px rgba(25,167,100,0)}
+    100%{box-shadow:0 0 0 0 rgba(25,167,100,0)}
+  }
+
+  .statusText{
+    color:var(--muted);
+    font-size:14px;
+    font-weight:700;
+  }
+
+  .controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    border:none;
+    border-radius:12px;
+    padding:11px 16px;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+    transition:.18s ease;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .btn:hover{transform:translateY(-1px)}
+  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+  .btn.start{
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    color:#fff;
+  }
+
+  .btn.stop{
+    background:linear-gradient(135deg,#b91c1c,var(--danger));
+    color:#fff;
+  }
+
+  .btn.restart{
+    background:#fff;
+    color:var(--text);
+    border:1px solid var(--border);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:340px 1fr 360px;
+    gap:18px;
+    align-items:start;
+  }
+
+  .centerStack,
+  .stack{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+    padding:18px;
+    position:relative;
+  }
+
+  .panelHeader{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+  }
+
+  .panelTitle{
+    font-size:17px;
+    font-weight:900;
+    letter-spacing:-.01em;
+  }
+
+  .panelSub{
+    margin-top:4px;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+    line-height:1.5;
+  }
+
+  .tag{
+    font-size:11px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--primary);
+    background:var(--primary-soft);
+    border:1px solid #cdeedd;
+    padding:7px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+
+  .sectionBox{
+    padding:16px;
+    border-radius:18px;
+    border:1px solid var(--border);
+    background:linear-gradient(180deg,#ffffff,#f8fbf9);
+    transition:.2s ease;
+  }
+
+  .sectionBox.active{
+    border-color:#8ad7b1;
+    box-shadow:0 0 0 4px rgba(25,167,100,.10), 0 12px 24px rgba(25,167,100,.07);
+  }
+
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    max-height:440px;
+    overflow:auto;
+    padding:4px 4px 4px 8px;
+    position:relative;
+  }
+
+  .req,.aclItem,.apprItem{
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    border-radius:16px;
+    padding:12px 14px;
+    transition:.2s ease;
+  }
+
+  .req{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .req.current{
+    border-color:#8ad7b1;
+    background:#effaf4;
+    box-shadow:0 0 0 4px rgba(25,167,100,.09);
+  }
+
+  .req.selected{
+    border-color:#60a5fa;
+    background:#eff6ff;
+    box-shadow:0 0 0 4px rgba(96,165,250,.12);
+  }
+
+  .req.done{
+    opacity:.65;
+  }
+
+  .req.denied{
+    border-color:#fecaca;
+    background:var(--danger-soft);
+  }
+
+  .reqMain{
+    flex:1;
+    min-width:0;
+  }
+
+  .reqActions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-left:auto;
+    flex-shrink:0;
+  }
+
+  .reqBtn{
+    border:none;
+    border-radius:10px;
+    padding:8px 12px;
+    font-size:12px;
+    font-weight:800;
+    cursor:pointer;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    color:#fff;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .reqBtn:hover{transform:translateY(-1px)}
+  .reqBtn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  .monos{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.7px;
+    line-height:1.6;
+    word-break:break-word;
+  }
+
+  .chip{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:900;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--muted);
+  }
+
+  .chip.high{
+    color:#9a3412;
+    border-color:#fed7aa;
+    background:#fff7ed;
+  }
+
+  .chip.done{
+    color:#166534;
+    border-color:#bbf7d0;
+    background:#f0fdf4;
+  }
+
+  .chip.denied{
+    color:#991b1b;
+    border-color:#fecaca;
+    background:#fff1f2;
+  }
+
+  .metricTitle{
+    font-size:12px;
+    font-weight:800;
+    color:var(--muted);
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+
+  .pbar{
+    width:100%;
+    height:10px;
+    background:#e6efe9;
+    border-radius:999px;
+    overflow:hidden;
+    border:1px solid #d8e6de;
+  }
+
+  .pbar > span{
+    display:block;
+    width:0;
+    height:100%;
+    background:linear-gradient(90deg,var(--primary-3),var(--primary));
+    border-radius:999px;
+    transition:width 1s ease;
+  }
+
+  .cursor{
+    position:absolute;
+    left:0;
+    width:6px;
+    height:30px;
+    border-radius:999px;
+    background:linear-gradient(180deg,var(--primary-3),var(--primary));
+    box-shadow:0 0 14px rgba(25,167,100,.35);
+    transform:translateY(0);
+    transition:transform 1s ease;
+    display:none;
+  }
+
+  .slimCursor{
+    position:absolute;
+    left:0;
+    width:4px;
+    height:26px;
+    border-radius:999px;
+    background:var(--primary-3);
+    box-shadow:0 0 12px rgba(25,167,100,.30);
+    display:none;
+  }
+
+  .aclItem.scanning,.apprItem.scanning{
+    border-color:#8ad7b1;
+    background:#effaf4;
+    box-shadow:0 0 0 4px rgba(25,167,100,.09);
+  }
+
+  .aclItem.miss,.apprItem.miss{
+    opacity:.45;
+  }
+
+  .aclItem.hit,.apprItem.hit{
+    background:#f0fdf4;
+    border-color:#86efac;
+    box-shadow:0 0 0 4px rgba(34,197,94,.10);
+  }
+
+
+  .systems{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .sys{
+    border:1px solid var(--border);
+    background:linear-gradient(180deg,#ffffff,#f8fbf9);
+    border-radius:18px;
+    padding:16px;
+    box-shadow:var(--shadow-soft);
+    transition:.2s ease;
+  }
+
+  .sysLabel{
+    font-size:12px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    font-weight:900;
+    margin-bottom:6px;
+  }
+
+  .sysName{
+    font-size:16px;
+    font-weight:900;
+    color:var(--text);
+  }
+
+  .sys.active{
+    border-color:#8ad7b1;
+    background:#effaf4;
+    box-shadow:0 0 0 4px rgba(25,167,100,.09), 0 10px 24px rgba(25,167,100,.08);
+  }
+
+  .sys.ok{
+    border-color:#86efac;
+    background:#f0fdf4;
+    box-shadow:0 0 0 4px rgba(34,197,94,.08);
+  }
+
+  .log{
+    background:linear-gradient(180deg,#0d1511,#111c16);
+    color:#d1fae5;
+    border:1px solid #1f3328;
+    border-radius:18px;
+    padding:14px;
+    min-height:180px;
+    max-height:180px;
+    overflow:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px;
+    line-height:1.7;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+  }
+
+  .logsPanel{
+    min-height:290px;
+  }
+
+  @media (max-width:1150px){
+    .grid{grid-template-columns:1fr}
+  }
+
+  @media (max-width:700px){
+    .heroText h1{font-size:24px}
+    .logoBox img{height:76px}
+    .req{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+    .reqActions{
+      width:100%;
+      margin-left:0;
+      justify-content:space-between;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="heroTop">
+      <div class="brand">
+        <div class="logoBox">
+          <img src="Logo2.png" alt="Logo">
+        </div>
+        <div class="heroText">
+          <h1>Secure Proxy Flow Dashboard</h1>
+          <p>Requests → Proxy → Access Control List → Approvers → Systems in Production Environment → Logs</p>
+        </div>
+      </div>
+
+      <div class="heroBadges">
+        <div class="heroBadge">Security Monitoring</div>
+        <div class="heroBadge">ACL Enforcement</div>
+        <div class="heroBadge">Production Workflow</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="statusWrap">
+      <div class="statusHead">
+        <span class="pulse"></span>
+        <span>Simulation Status</span>
+      </div>
+      <div class="statusText" id="status">System initialized. Press Start to run the simulation.</div>
+    </div>
+
+    <div class="controls">
+      <button id="startBtn" class="btn start">Start</button>
+      <button id="stopBtn" class="btn stop" disabled>Stop</button>
+      <button id="restartBtn" class="btn restart">Restart</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="panel" id="leftRequests">
+      <div class="panelHeader">
+        <div>
+          <div class="panelTitle">Incoming Requests</div>
+          <div class="panelSub">Queued operations awaiting verification and routing</div>
+        </div>
+        <div class="tag">Queue</div>
+      </div>
+
+      <div id="reqList" class="list"></div>
+      <div class="cursor" id="queueCursor"></div>
+
+      <div style="margin-top:14px">
+        <div class="metricTitle">Queue Progress</div>
+        <div class="pbar"><span id="queueBar"></span></div>
+      </div>
+    </div>
+
+    <div class="centerStack">
+      <div class="panel">
+        <div class="panelHeader">
+          <div>
+            <div class="panelTitle">Proxy Decision Layer</div>
+            <div class="panelSub">Traffic inspection, policy validation, and routing control</div>
+          </div>
+          <div class="tag">Core Engine</div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div class="metricTitle">Proxy Progress</div>
+          <div class="pbar"><span id="proxyBar"></span></div>
+        </div>
+
+        <div class="sectionBox" id="aclBox">
+          <div class="panelHeader" style="margin-bottom:12px">
+            <div>
+              <div class="panelTitle">Access Control List</div>
+              <div class="panelSub">Authorized operations and approval escalation policies</div>
+            </div>
+            <div class="tag">ACL</div>
+          </div>
+
+          <div class="list monos" id="aclList" style="max-height:300px;"></div>
+          <div class="slimCursor" id="aclCursor"></div>
+
+          <div style="margin-top:14px">
+            <div class="metricTitle">ACL Scan Progress</div>
+            <div class="pbar"><span id="aclScanBar"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel logsPanel">
+        <div class="sectionBox" id="logsBox">
+          <div class="panelHeader" style="margin-bottom:12px">
+            <div>
+              <div class="panelTitle">Audit Logs</div>
+              <div class="panelSub">Recorded events, denied actions, and completed operations</div>
+            </div>
+            <div class="tag">Logging</div>
+          </div>
+
+          <div id="log" class="log"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="panel">
+        <div class="sectionBox" id="approversBox">
+          <div class="panelHeader" style="margin-bottom:12px">
+            <div>
+              <div class="panelTitle">Approvers</div>
+              <div class="panelSub">Approval workflow for high-risk operations</div>
+            </div>
+            <div class="tag">Escalation</div>
+          </div>
+
+          <div class="list monos" id="apprList" style="max-height:210px;"></div>
+          <div class="slimCursor" id="apprCursor"></div>
+
+          <div style="margin-top:14px">
+            <div class="metricTitle">Approver Scan</div>
+            <div class="pbar"><span id="apprScanBar"></span></div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div class="metricTitle">Approval Progress</div>
+            <div class="pbar"><span id="approverBar"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="sectionBox" id="systemsBox">
+          <div class="panelHeader" style="margin-bottom:12px">
+            <div>
+              <div class="panelTitle">Systems in Production Environment</div>
+              <div class="panelSub">Validated requests are executed on target production systems</div>
+            </div>
+            <div class="tag">Execution</div>
+          </div>
+
+          <div class="systems">
+            <div class="sys" id="sysERP">
+              <div class="sysLabel">Target System</div>
+              <div class="sysName">ERP</div>
+            </div>
+
+            <div class="sys" id="sysBANNER">
+              <div class="sysLabel">Target System</div>
+              <div class="sysName">Banner</div>
+            </div>
+
+            <div class="sys" id="sysTSS">
+              <div class="sysLabel">Target System</div>
+              <div class="sysName">Technical Support System</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const $=(s)=>document.querySelector(s);
+const reqListEl=$('#reqList'), queueBar=$('#queueBar'), queueCursor=$('#queueCursor');
+const proxyBar=$('#proxyBar'), approverBar=$('#approverBar');
+const logEl=$('#log'), statusEl=$('#status');
+const leftRequests=$('#leftRequests'), aclBox=$('#aclBox'), approversBox=$('#approversBox'), systemsBox=$('#systemsBox'), logsBox=$('#logsBox');
+const sysEls={
+  ERP:$('#sysERP'),
+  BANNER:$('#sysBANNER'),
+  'TECHNICAL SUPPORT SYSTEM':$('#sysTSS')
+};
+const startBtn=$('#startBtn'), stopBtn=$('#stopBtn'), restartBtn=$('#restartBtn');
+const aclListEl=$('#aclList'), aclScanBar=$('#aclScanBar'), aclCursor=$('#aclCursor');
+const apprListEl=$('#apprList'), apprScanBar=$('#apprScanBar'), apprCursor=$('#apprCursor');
+
+aclListEl.style.position='relative';
+apprListEl.style.position='relative';
+aclListEl.appendChild(aclCursor);
+apprListEl.appendChild(apprCursor);
+
+const aclWhitelist = [
+  {user:'Ali',    action:'read',    system:'ERP',                      high:false},
+  {user:'Fatima', action:'read',    system:'BANNER',                   high:false},
+
+  {user:'Ali',    action:'write',   system:'ERP',                      high:false},
+  {user:'Fatima', action:'write',   system:'BANNER',                   high:false},
+  {user:'Aseel',  action:'write',   system:'Technical Support System', high:true},
+
+  {user:'Ali',    action:'restart', system:'ERP',                      high:false},
+  {user:'Fatima', action:'restart', system:'ERP',                      high:false},
+  {user:'Aseel',  action:'restart', system:'ERP',                      high:false},
+
+  {user:'Aseel',  action:'read',    system:'Technical Support System', high:false},
+  {user:'Omar',   action:'read',    system:'ERP',                      high:false},
+  {user:'Omar',   action:'restart', system:'ERP',                      high:true},
+
+  {user:'Reem',   action:'read',    system:'BANNER',                   high:false},
+
+  /* denied at approver stage */
+  {user:'Sara',   action:'delete',  system:'ERP',                      high:true}
+];
+
+const approversList=[
+  {admin:'Kamal', action:'write',   system:'ERP'},
+  {admin:'Kamal', action:'restart', system:'ERP'},
+  {admin:'Nour',  action:'write',   system:'BANNER'},
+  {admin:'Nour',  action:'restart', system:'BANNER'},
+  {admin:'Nour',  action:'write',   system:'Technical Support System'}
+];
+
+let queue=[], totalCount=0, processed=0;
+let currentFlow=[], flowStep=0;
+let playingTimer=null, isRunning=false;
+let stepRunning=false;
+let currentRequestDenied=false;
+
+let selectedRequestId=null;
+let singleRunMode=false;
+let requestIdCounter=1;
+
+function progress(el,p){ if(el) el.style.width=p+'%'; }
+function log(m){ logEl.innerHTML+=`• ${m}<br>`; logEl.scrollTop=logEl.scrollHeight; }
+function setActiveBox(el){ [leftRequests,aclBox,approversBox,systemsBox,logsBox].forEach(b=>b.classList.remove('active')); el&&el.classList.add('active'); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function moveQueueCursorById(requestId){
+  const row=reqListEl.querySelector(`[data-id="${requestId}"]`);
+  if(!row){ queueCursor.style.display='none'; return; }
+  queueCursor.style.display='block';
+  const listTop=reqListEl.getBoundingClientRect().top;
+  const rowTop=row.getBoundingClientRect().top;
+  const delta=rowTop - listTop + reqListEl.scrollTop + 8;
+  queueCursor.style.transform=`translateY(${delta}px)`;
+  row.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function moveSlimCursor(listEl,cursorEl,rowEl){
+  if(!rowEl){ cursorEl.style.display='none'; return; }
+  cursorEl.style.display='block';
+  const listRect=listEl.getBoundingClientRect();
+  const rowRect=rowEl.getBoundingClientRect();
+  const delta=(rowRect.top - listRect.top) + listEl.scrollTop + 8;
+  cursorEl.style.top = delta + 'px';
+  rowEl.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+
+function makeRequest(user, action, system, high){
+  return {
+    id: requestIdCounter++,
+    user,
+    action,
+    system,
+    high
+  };
+}
+
+function getCurrentRequest(){
+  if(selectedRequestId !== null){
+    return queue.find(r => r.id === selectedRequestId) || null;
+  }
+  return queue[0] || null;
+}
+
+function renderQueue(){
+  reqListEl.innerHTML='';
+
+  queue.forEach((r)=>{
+    const row=document.createElement('div');
+    row.className='req';
+    row.dataset.id = r.id;
+
+    if(selectedRequestId === r.id) row.classList.add('selected');
+
+    row.innerHTML=`
+      <div class="reqMain monos">&lt; ${r.user}, ${r.action}${r.high?' (high)':''}, ${r.system} &gt;</div>
+      <div class="reqActions">
+        <button class="reqBtn" data-run-id="${r.id}">Run</button>
+        <div class="chip ${r.high?'high':''}">
+          ${selectedRequestId === r.id ? 'selected' : 'pending'}
+        </div>
+      </div>
+    `;
+
+    reqListEl.appendChild(row);
+  });
+
+  reqListEl.querySelectorAll('.reqBtn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const id = Number(btn.dataset.runId);
+      runSingleRequest(id);
+    });
+  });
+
+  if(selectedRequestId !== null){
+    moveQueueCursorById(selectedRequestId);
+  }else if(queue[0]){
+    moveQueueCursorById(queue[0].id);
+  }else{
+    queueCursor.style.display='none';
+  }
+
+  progress(queueBar, totalCount ? (processed/totalCount*100) : 0);
+}
+
+function updateCurrentRowVisual(status="done"){
+  const row = selectedRequestId !== null
+    ? reqListEl.querySelector(`[data-id="${selectedRequestId}"]`)
+    : reqListEl.querySelector('.req');
+
+  if(!row) return;
+
+  row.classList.remove('current','selected');
+  const chip=row.querySelector('.chip');
+
+  if(status==="denied"){
+    row.classList.add('denied');
+    if(chip){
+      chip.textContent='denied ✗';
+      chip.classList.add('denied');
+      chip.classList.remove('done');
+    }
+  }else{
+    row.classList.add('done');
+    if(chip){
+      chip.textContent='done ✓';
+      chip.classList.add('done');
+    }
+  }
+}
+
+function setCurrentRowProcessing(){
+  reqListEl.querySelectorAll('.req').forEach(r=>r.classList.remove('current'));
+  const row = selectedRequestId !== null
+    ? reqListEl.querySelector(`[data-id="${selectedRequestId}"]`)
+    : reqListEl.querySelector('.req');
+
+  if(row){
+    row.classList.add('current');
+    moveQueueCursorById(Number(row.dataset.id));
+    const chip=row.querySelector('.chip');
+    if(chip) chip.textContent='processing';
+  }
+}
+
+function renderACLList(){
+  aclListEl.innerHTML='';
+  aclWhitelist.forEach(e=>{
+    const d=document.createElement('div');
+    d.className='aclItem';
+    const tag = e.high ? ' (high)' : '';
+    d.textContent=`< ${e.user}, ${e.action}${tag}, ${e.system} >`;
+    aclListEl.appendChild(d);
+  });
+}
+
+function renderApprList(){
+  apprListEl.innerHTML='';
+  approversList.forEach(e=>{
+    const d=document.createElement('div');
+    d.className='apprItem';
+    d.textContent=`< ${e.admin}, ${e.action}, ${e.system} >`;
+    apprListEl.appendChild(d);
+  });
+}
+
+const isSame=(a,b)=>String(a).toLowerCase()===String(b).toLowerCase();
+const lookupACL=(r)=>aclWhitelist.find(e=>isSame(e.user,r.user)&&isSame(e.action,r.action)&&isSame(e.system,r.system));
+
+async function scanACLAnimation(r){
+  const items=[...aclListEl.querySelectorAll('.aclItem')];
+  items.forEach(x=>x.classList.remove('scanning','miss','hit'));
+  progress(aclScanBar,0);
+
+  let hit=false;
+  for(let i=0;i<aclWhitelist.length;i++){
+    const e=aclWhitelist[i], el=items[i];
+    moveSlimCursor(aclListEl, aclCursor, el);
+    progress(aclScanBar, Math.round((i/Math.max(aclWhitelist.length-1,1))*100));
+    el.classList.add('scanning');
+    await sleep(700);
+    el.classList.remove('scanning');
+
+    if(isSame(e.user,r.user)&&isSame(e.action,r.action)&&isSame(e.system,r.system)){
+      el.classList.add('hit');
+      hit=true;
+      progress(aclScanBar,100);
+      break;
+    } else {
+      el.classList.add('miss');
+    }
+  }
+  if(!hit) progress(aclScanBar,100);
+  return hit;
+}
+
+async function scanApproverAnimation(r){
+  const items=[...apprListEl.querySelectorAll('.apprItem')];
+  items.forEach(x=>x.classList.remove('scanning','miss','hit'));
+  progress(apprScanBar,0);
+
+  let hit=false;
+
+  for(let i=0;i<approversList.length;i++){
+    const e=approversList[i], el=items[i];
+    moveSlimCursor(apprListEl, apprCursor, el);
+    progress(apprScanBar, Math.round((i/Math.max(approversList.length-1,1))*100));
+    el.classList.add('scanning');
+    await sleep(700);
+    el.classList.remove('scanning');
+
+    if(isSame(e.action,r.action) && isSame(e.system,r.system)){
+      el.classList.add('hit');
+      progress(apprScanBar,100);
+      hit=true;
+      break;
+    } else {
+      el.classList.add('miss');
+    }
+  }
+
+  if(!hit) progress(apprScanBar,100);
+  return hit;
+}
+
+const needsApprover=(r)=> {
+  const entry = lookupACL(r);
+  return !!(entry && entry.high === true);
+};
+
+function resetStepProgress(){
+  progress(proxyBar,0);
+  progress(approverBar,0);
+  progress(aclScanBar,0);
+  progress(apprScanBar,0);
+  aclCursor.style.display='none';
+  apprCursor.style.display='none';
+  Object.values(sysEls).forEach(e=>e.classList.remove('ok','active'));
+}
+
+function buildFlow(r){
+  const steps=[];
+
+  steps.push(async()=>{
+    setActiveBox(leftRequests);
+    statusEl.textContent='Request received and routed to Proxy.';
+    progress(proxyBar,15);
+  });
+
+  steps.push(async()=>{
+    setActiveBox(aclBox);
+    statusEl.textContent='Access Control List scan in progress...';
+    progress(proxyBar,35);
+
+    const ok=await scanACLAnimation(r);
+    const entry = lookupACL(r);
+
+    if(!ok || !entry){
+      currentRequestDenied = true;
+      statusEl.textContent = 'Access Control List validation failed. Request denied.';
+      log(`❌ DENIED: Unauthorized request <${r.user}, ${r.action}, ${r.system}>`);
+      progress(proxyBar,45);
+      return;
+    }
+
+    statusEl.textContent = entry.high
+      ? 'Request found in Access Control List. Escalating for approval.'
+      : 'Request found in Access Control List. Approver stage bypassed.';
+  });
+
+  steps.push(async()=>{
+    if(currentRequestDenied){
+      setActiveBox(logsBox);
+      statusEl.textContent='Denied request recorded in logs.';
+      return;
+    }
+
+    if(needsApprover(r)){
+      setActiveBox(approversBox);
+      statusEl.textContent='Approver validation in progress...';
+      progress(approverBar,50);
+
+      const approverFound = await scanApproverAnimation(r);
+
+      if(!approverFound){
+        currentRequestDenied = true;
+        statusEl.textContent='No approver available. Request denied.';
+        log(`❌ DENIED: No approver found for <${r.user}, ${r.action}, ${r.system}>`);
+        progress(approverBar,100);
+        return;
+      }
+
+      log(`✅ APPROVED: Matching approver found for <${r.user}, ${r.action}, ${r.system}>`);
+      progress(approverBar,85);
+    }
+  });
+
+  steps.push(async()=>{
+    if(currentRequestDenied){
+      setActiveBox(logsBox);
+      statusEl.textContent='Denied request archived.';
+      progress(proxyBar,100);
+      return;
+    }
+
+    setActiveBox(systemsBox);
+    statusEl.textContent=`Validated request executing on ${r.system}.`;
+    const key=r.system.toUpperCase();
+    const el=sysEls[key]||sysEls[r.system];
+    el?.classList.add('active');
+
+    setTimeout(()=>{
+      el?.classList.remove('active');
+      el?.classList.add('ok');
+    },520);
+
+    progress(proxyBar,85);
+  });
+
+  steps.push(async()=>{
+    setActiveBox(logsBox);
+
+    if(currentRequestDenied){
+      statusEl.textContent='Deny event logged successfully.';
+      progress(proxyBar,100);
+      return;
+    }
+
+    statusEl.textContent='Execution completed and logged successfully.';
+    log(`Completed <${r.user}, ${r.action}, ${r.system}>`);
+    progress(proxyBar,100);
+  });
+
+  return steps;
+}
+
+function removeProcessedRequestById(id){
+  const idx = queue.findIndex(r => r.id === id);
+  if(idx !== -1) queue.splice(idx,1);
+}
+
+async function nextStep(){
+  if (stepRunning) return;
+  stepRunning = true;
+
+  try{
+    if(currentFlow.length===0){
+      if(queue.length===0) loadSamples();
+
+      currentRequestDenied = false;
+      resetStepProgress();
+
+      renderACLList();
+      renderApprList();
+      renderQueue();
+
+      const r = getCurrentRequest();
+      if(!r){
+        stopAuto();
+        statusEl.textContent='No request available to process.';
+        return;
+      }
+
+      setCurrentRowProcessing();
+      log(`Received: <${r.user}, ${r.action}${r.high?' (high)':''}, ${r.system}>`);
+      currentFlow=buildFlow(r);
+      flowStep=0;
+    }
+
+    if(flowStep<currentFlow.length){
+      await currentFlow[flowStep++]();
+    }else{
+      const finishedId = selectedRequestId !== null ? selectedRequestId : (queue[0]?.id ?? null);
+
+      updateCurrentRowVisual(currentRequestDenied ? "denied" : "done");
+      processed = Math.min(processed+1, totalCount);
+      progress(queueBar, totalCount ? (processed/totalCount*100) : 0);
+
+      if(finishedId !== null){
+        removeProcessedRequestById(finishedId);
+      }
+
+      currentFlow=[];
+      flowStep=0;
+      aclCursor.style.display='none';
+      apprCursor.style.display='none';
+
+      if(singleRunMode){
+        const ranRequestId = selectedRequestId;
+        selectedRequestId = null;
+        singleRunMode = false;
+        renderQueue();
+        stopAuto();
+        statusEl.textContent=`Selected request ${ranRequestId} finished.`;
+        return;
+      }
+
+      selectedRequestId = null;
+
+      if(queue.length){
+        renderQueue();
+      } else {
+        renderQueue();
+        statusEl.textContent='All requests processed successfully.';
+        stopAuto();
+      }
+    }
+  } finally {
+    stepRunning=false;
+  }
+}
+
+function loadSamples(){
+  queue = [
+    makeRequest('Fatima', 'read',    'BANNER',                   false),
+    makeRequest('Aseel',  'write',   'Technical Support System', true),
+    makeRequest('Aseel',  'read',    'Technical Support System', false),
+    makeRequest('Omar',   'read',    'ERP',                      false),
+    makeRequest('Reem',   'write',   'BANNER',                   true),
+    makeRequest('Omar',   'restart', 'ERP',                      true),
+    makeRequest('Sara',   'delete',  'ERP',                      true),
+    makeRequest('Reem',   'read',    'BANNER',                   false),
+    makeRequest('Fahad',  'delete',  'ERP',                      true)
+  ];
+  totalCount = queue.length;
+  processed = 0;
+  selectedRequestId = null;
+  singleRunMode = false;
+  renderQueue();
+}
+
+function startAuto(){
+  if(isRunning) return;
+  selectedRequestId = null;
+  singleRunMode = false;
+  isRunning=true;
+  startBtn.disabled=true;
+  stopBtn.disabled=false;
+  playingTimer=setInterval(nextStep,3000);
+  statusEl.textContent='Simulation is running.';
+}
+
+function stopAuto(){
+  clearInterval(playingTimer);
+  isRunning=false;
+  startBtn.disabled=false;
+  stopBtn.disabled=true;
+  if(queue.length){
+    statusEl.textContent='Simulation paused. Press Start to continue.';
+  }
+}
+
+function runSingleRequest(id){
+  if(stepRunning) return;
+
+  if(isRunning){
+    stopAuto();
+  }
+
+  const selected = queue.find(r => r.id === id);
+  if(!selected) return;
+
+  selectedRequestId = id;
+  singleRunMode = true;
+  currentFlow = [];
+  flowStep = 0;
+  currentRequestDenied = false;
+
+  resetStepProgress();
+  renderQueue();
+  setCurrentRowProcessing();
+
+  statusEl.textContent = `Selected request is running: <${selected.user}, ${selected.action}, ${selected.system}>`;
+
+  isRunning = true;
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
+  playingTimer = setInterval(nextStep,3000);
+}
+
+function restartAll(){
+  if(isRunning) stopAuto();
+
+  queue=[];
+  totalCount=0;
+  processed=0;
+  currentFlow=[];
+  flowStep=0;
+  currentRequestDenied=false;
+  selectedRequestId=null;
+  singleRunMode=false;
+  requestIdCounter=1;
+
+  reqListEl.innerHTML='';
+  logEl.innerHTML='';
+
+  progress(queueBar,0);
+  progress(proxyBar,0);
+  progress(approverBar,0);
+  progress(aclScanBar,0);
+  progress(apprScanBar,0);
+
+  queueCursor.style.display='none';
+  aclCursor.style.display='none';
+  apprCursor.style.display='none';
+
+  Object.values(sysEls).forEach(e=>e.classList.remove('ok','active'));
+
+  renderACLList();
+  renderApprList();
+  loadSamples();
+  statusEl.textContent='System reset completed. Press Start to run again or press Run on any request.';
+}
+
+startBtn.onclick=startAuto;
+stopBtn.onclick=stopAuto;
+restartBtn.onclick=restartAll;
+
+renderACLList();
+renderApprList();
+loadSamples();
+</script>
+</body>
+</html>
